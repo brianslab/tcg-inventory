@@ -1,8 +1,7 @@
-#!/usr/bin/python3
-
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import sys, getopt
+from cardListParse import getTcgpCards
 
 # Initialize client
 scope = [
@@ -16,6 +15,7 @@ client = gspread.authorize(creds)
 inv = "MTG Cards"
 
 storage = client.open(inv).worksheet("storage")
+trades = client.open(inv).worksheet("trades")
 # breena = client.open(inv).worksheet("EDH-Breena")
 # nicol = client.open(inv).worksheet("EDH-Nicol Bolas")
 # child = client.open(inv).worksheet("EDH-Child of Alara")
@@ -23,7 +23,7 @@ storage = client.open(inv).worksheet("storage")
 
 # Parse arguments
 addfile = ""
-to = storage.title
+to = "storage"
 parseTcgpOrder = False
 try:
     opts, args = getopt.getopt(sys.argv[1:], "ha:t:o", ["help", "add=", "to=", "order"])
@@ -37,12 +37,17 @@ for opt, arg in opts:
     elif opt in ("-a", "--add"):
         addfile = arg
     elif opt in ("-t", "--to"):
-        to = arg
+        to = client.open(inv).worksheet(arg)
     elif opt in ("-o", "--order"):
         parseTcgpOrder = True
 
 if addfile:
     if parseTcgpOrder:
         print("adding cards from TCGPlayer order", addfile, "to", to)
+        additions = getTcgpCards(addfile)
     else:
         print("adding cards from", addfile, "to", to)
+
+item = 0
+for item in range(0, len(additions[0])):
+    to.append_row([additions[0][item], additions[1][item]])
