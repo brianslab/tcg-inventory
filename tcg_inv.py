@@ -16,26 +16,33 @@ client = gspread.authorize(creds)
 inv = "MTG Cards"
 
 storage = client.open(inv).worksheet("storage")
-breena = client.open(inv).worksheet("EDH-Breena")
-nicol = client.open(inv).worksheet("EDH-Nicol Bolas")
-child = client.open(inv).worksheet("EDH-Child of Alara")
-etron = client.open(inv).worksheet("MOD-Eldrazi Tron")
+# breena = client.open(inv).worksheet("EDH-Breena")
+# nicol = client.open(inv).worksheet("EDH-Nicol Bolas")
+# child = client.open(inv).worksheet("EDH-Child of Alara")
+# etron = client.open(inv).worksheet("MOD-Eldrazi Tron")
 
 # Parse arguments
 addfile = ""
 to = storage.title
+parseTcgpOrder = False
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ha:t:", ["add=", "to="])
+    opts, args = getopt.getopt(sys.argv[1:], "ha:t:o", ["help", "add=", "to=", "order"])
 except:
-    print("ERROR: invalid arguments. See -h")
+    print("ERROR: invalid arguments. See -h or --help")
     sys.exit(2)
 for opt, arg in opts:
-    if opt == "-h":
+    if opt in ("-h", "--help"):
         print("-add : adds cards from file")
         sys.exit()
     elif opt in ("-a", "--add"):
         addfile = arg
     elif opt in ("-t", "--to"):
         to = arg
+    elif opt in ("-o", "--order"):
+        parseTcgpOrder = True
 
-print("adding cards from", addfile, "to", to)
+if addfile:
+    if parseTcgpOrder:
+        print("adding cards from TCGPlayer order", addfile, "to", to)
+    else:
+        print("adding cards from", addfile, "to", to)
