@@ -24,12 +24,12 @@ trades = client.open(inv).worksheet("trades")
 
 # Parse arguments
 addfile = ""
-to = "storage"
+to = client.open(inv).worksheet("storage")
 parseTcgpOrder = False
 parseDecklist = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ha:t:pln:", ["help", "add=", "to=", "tcgp", "list", "new="])
+    opts, args = getopt.getopt(sys.argv[1:], "ha:t:pln:d:", ["help", "add=", "to=", "tcgp", "list", "new=", "delete="])
 except:
     print("ERROR: invalid arguments. See -h or --help")
     sys.exit(2)
@@ -54,6 +54,12 @@ for opt, arg in opts:
             newSheet = client.open(inv).add_worksheet(title=arg, rows="1000", cols="2")
         finally:
             to = client.open(inv).worksheet(arg)
+    elif opt in ("-d", "--delete"):
+        delete = client.open(inv).worksheet(arg)
+        print("Deleting deck:", delete.title)
+        addfile = delete.title
+        additions = [delete.col_values(1), delete.col_values(2)]
+        client.open(inv).del_worksheet(delete)
 
 if addfile:
     if parseTcgpOrder:
