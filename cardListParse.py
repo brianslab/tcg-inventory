@@ -12,3 +12,6 @@ def getTcgpCards (order):
     # print(cardQtys)
     f.close()
     return cardNames, cardQtys
+
+def getDecklistCards (list):
+    return
