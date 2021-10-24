@@ -57,13 +57,13 @@ for opt, arg in opts:
 
 if addfile:
     if parseTcgpOrder:
-        print("adding cards from TCGPlayer order", addfile, "to", to)
+        print("adding cards from TCGPlayer order", addfile, "to", to.title)
         additions = getTcgpCards(addfile)
     elif parseDecklist:
-        print("adding cards from decklist", addfile, "to", to)
+        print("adding cards from decklist", addfile, "to", to.title)
         additions = getDecklistCards(addfile)
     else:
-        print("adding cards from", addfile, "to", to)
+        print("adding cards from", addfile, "to", to.title)
     item = 0
     for item in range(0, len(additions[0])):
         to.append_row([additions[0][item], additions[1][item]])
