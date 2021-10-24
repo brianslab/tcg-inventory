@@ -8,10 +8,17 @@ def getTcgpCards (order):
             entries = re.sub('\s+', ' ', line).split(" - ")
             cardNames.append(entries[2])
             cardQtys.append(entries[0][:1])
-    # print(cardNames)
-    # print(cardQtys)
+
     f.close()
     return cardNames, cardQtys
 
-def getDecklistCards (list):
-    return
+def getDecklistCards (decklist):
+    cardNames = []
+    cardQtys = []
+    with open(decklist, "r") as f:
+        for line in f:
+            cardNames.append(line.rstrip('\n')[1:])
+            cardQtys.append(line[0])
+
+    f.close()
+    return cardNames, cardQtys

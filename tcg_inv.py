@@ -1,7 +1,8 @@
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import sys, getopt
-from cardListParse import getTcgpCards
+import time
+from cardListParse import getTcgpCards, getDecklistCards
 
 # Initialize client
 scope = [
@@ -51,6 +52,7 @@ for opt, arg in opts:
         except:
             print("Creating deck:", arg)
             newSheet = client.open(inv).add_worksheet(title=arg, rows="1000", cols="2")
+        finally:
             to = client.open(inv).worksheet(arg)
 
 if addfile:
@@ -65,3 +67,4 @@ if addfile:
     item = 0
     for item in range(0, len(additions[0])):
         to.append_row([additions[0][item], additions[1][item]])
+        time.sleep(1)
