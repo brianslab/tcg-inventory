@@ -17,7 +17,7 @@ def getDecklistCards (decklist):
     cardQtys = []
     with open(decklist, "r") as f:
         for line in f:
-            cardNames.append(line.rstrip('\n')[1:])
+            cardNames.append(line.rstrip('\n')[2:])
             cardQtys.append(line[0])
 
     f.close()

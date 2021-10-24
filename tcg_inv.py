@@ -12,24 +12,17 @@ scope = [
 creds = ServiceAccountCredentials.from_json_keyfile_name('tcg-inventory-SA.json', scope)
 client = gspread.authorize(creds)
 
-# Iinitialiaze sheets
-inv = "MTG Cards"
-
-storage = client.open(inv).worksheet("storage")
-trades = client.open(inv).worksheet("trades")
-# breena = client.open(inv).worksheet("EDH-Breena")
-# nicol = client.open(inv).worksheet("EDH-Nicol Bolas")
-# child = client.open(inv).worksheet("EDH-Child of Alara")
-# etron = client.open(inv).worksheet("MOD-Eldrazi Tron")
+# Iinitialiaze inventory
+inv = client.open("MTG Cards")
 
 # Parse arguments
 addfile = ""
-to = client.open(inv).worksheet("storage")
+to = inv.worksheet("storage")
 parseTcgpOrder = False
 parseDecklist = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ha:t:pln:d:", ["help", "add=", "to=", "tcgp", "list", "new=", "delete="])
+    opts, args = getopt.getopt(sys.argv[1:], "ha:t:pln:d:s:", ["help", "add=", "to=", "tcgp", "list", "new=", "delete=", "shoplist="])
 except:
     print("ERROR: invalid arguments. See -h or --help")
     sys.exit(2)
@@ -40,26 +33,38 @@ for opt, arg in opts:
     elif opt in ("-a", "--add"):
         addfile = arg
     elif opt in ("-t", "--to"):
-        to = client.open(inv).worksheet(arg)
+        to = inv.worksheet(arg)
     elif opt in ("-p", "--tcgp"):
         parseTcgpOrder = True
     elif opt in ("-l", "--list"):
         parseDecklist = True
     elif opt in ("-n", "--new"):
         try:
-            client.open(inv).worksheet(arg)
+            inv.worksheet(arg)
             print("Existing deck:", arg)
         except:
             print("Creating deck:", arg)
-            newSheet = client.open(inv).add_worksheet(title=arg, rows="1000", cols="2")
+            newSheet = inv.add_worksheet(title=arg, rows="1000", cols="2")
         finally:
-            to = client.open(inv).worksheet(arg)
+            to = inv.worksheet(arg)
     elif opt in ("-d", "--delete"):
-        delete = client.open(inv).worksheet(arg)
+        delete = inv.worksheet(arg)
         print("Deleting deck:", delete.title)
         addfile = delete.title
         additions = [delete.col_values(1), delete.col_values(2)]
-        client.open(inv).del_worksheet(delete)
+        inv.del_worksheet(delete)
+    elif opt in ("-s", "--shoplist"):
+        print("Checking inventory for cards in", arg)
+        desiredList = getDecklistCards(arg)
+        ownedCards = inv.worksheet("storage")
+        shoppingList = list(set(desiredList[0]).difference(ownedCards.col_values(1)))
+        shopFile = arg + ".shop"
+        print("Saving shopping list to", shopFile)
+        with open(shopFile, "w") as f:
+            for item in shoppingList:
+                f.write(item + '\n')
+        f.close()
+
 
 if addfile:
     if parseTcgpOrder:
