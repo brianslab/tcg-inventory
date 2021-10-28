@@ -81,7 +81,7 @@ for opt, arg in opts:
 # TODO: make everything after here a function
 if shop:
     desiredList = getDecklistCards(shopFile)
-    ownedCards = inv.worksheet("storage").col_values(1)
+    ownedCards = inv.worksheet("storage").col_values(1) + inv.worksheet("trades").col_values(1)
     if shopParse:
         ownedCards += shopParseDeck.col_values(1)
     
