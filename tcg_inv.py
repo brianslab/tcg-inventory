@@ -38,9 +38,10 @@ try:
 except:
     print("ERROR: invalid arguments. See -h or --help")
     sys.exit(2)
-    
+
 for opt, arg in opts:
     if opt in ("-h", "--help"):
+        # TODO: add help printout function
         print("-add : adds cards from file")
         sys.exit()
     elif opt in ("-a", "--add"):
