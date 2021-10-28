@@ -90,8 +90,10 @@ if shop:
     print("Saving shopping list to", shopFile)
     with open(shopFile, "w") as f:
         for item in shoppingList:
-            f.write(item + '\n')
+            if item:
+                f.write('1 ' + item + '\n')
     f.close()
+    print("https://tcgplayer.com/massentry")
 
 if addfile:
     if parseTcgpOrder:
