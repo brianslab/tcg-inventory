@@ -20,9 +20,11 @@ addfile = ""
 to = inv.worksheet("storage")
 parseTcgpOrder = False
 parseDecklist = False
+shop = False
+shopParse = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ha:t:pln:d:s:", ["help", "add=", "to=", "tcgp", "list", "new=", "delete=", "shoplist="])
+    opts, args = getopt.getopt(sys.argv[1:], "ha:t:pln:d:s:r:", ["help", "add=", "to=", "tcgp", "list", "new=", "delete=", "shoplist=", "shopparse="])
 except:
     print("ERROR: invalid arguments. See -h or --help")
     sys.exit(2)
@@ -55,16 +57,26 @@ for opt, arg in opts:
         inv.del_worksheet(delete)
     elif opt in ("-s", "--shoplist"):
         print("Checking inventory for cards in", arg)
-        desiredList = getDecklistCards(arg)
-        ownedCards = inv.worksheet("storage")
-        shoppingList = list(set(desiredList[0]).difference(ownedCards.col_values(1)))
-        shopFile = arg + ".shop"
-        print("Saving shopping list to", shopFile)
-        with open(shopFile, "w") as f:
-            for item in shoppingList:
-                f.write(item + '\n')
-        f.close()
+        shop = True
+        shopFile = arg
+    elif opt in ("-r", "--shopparse"):
+        print("Looking for owned cards in", arg)
+        shopParse = True
+        shopParseDeck = inv.worksheet(arg)
 
+if shop:
+    desiredList = getDecklistCards(shopFile)
+    ownedCards = inv.worksheet("storage").col_values(1)
+    if shopParse:
+        ownedCards += shopParseDeck.col_values(1)
+    
+    shoppingList = list(set(desiredList[0]).difference(ownedCards))
+    shopFile += ".shop"
+    print("Saving shopping list to", shopFile)
+    with open(shopFile, "w") as f:
+        for item in shoppingList:
+            f.write(item + '\n')
+    f.close()
 
 if addfile:
     if parseTcgpOrder:
