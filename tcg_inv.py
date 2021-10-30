@@ -14,12 +14,15 @@ client = gspread.authorize(creds)
 
 # Iinitialiaze inventory
 inv = client.open("MTG Cards")
+storage = inv.worksheet("storage")
+basics = ["Plains", "Island", "Swamp", "Mountain", "Forest"]
 
 # Parse arguments
 addfile = ""
-to = inv.worksheet("storage")
+to = storage
 parseTcgpOrder = False
 parseDecklist = False
+removeFromStorage = False
 shop = False
 shopParse = False
 
@@ -61,6 +64,7 @@ for opt, arg in opts:
             newSheet = inv.add_worksheet(title=arg, rows="1000", cols="2")
         finally:
             to = inv.worksheet(arg)
+            removeFromStorage = True               
     elif opt in ("-d", "--delete"):
         delete = inv.worksheet(arg)
         print("Deleting deck:", delete.title)
@@ -81,7 +85,7 @@ for opt, arg in opts:
 # TODO: make everything after here a function
 if shop:
     desiredList = getDecklistCards(shopFile)
-    ownedCards = inv.worksheet("storage").col_values(1) + inv.worksheet("trades").col_values(1)
+    ownedCards = storage.col_values(1) + inv.worksheet("trades").col_values(1)
     if shopParse:
         ownedCards += shopParseDeck.col_values(1)
     
@@ -102,6 +106,12 @@ if addfile:
     elif parseDecklist:
         print("adding cards from decklist", addfile, "to", to.title)
         additions = getDecklistCards(addfile)
+        if removeFromStorage:
+            ownedCards = storage.col_values(1)
+            for card in additions[0]:
+                if (card in ownedCards):
+                    storage.update_cell(storage.find(card).row, 1, '')
+                    time.sleep(2)
     else:
         print("adding cards from", addfile, "to", to.title)
     item = 0
