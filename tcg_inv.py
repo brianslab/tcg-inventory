@@ -19,15 +19,17 @@ basics = ["Plains", "Island", "Swamp", "Mountain", "Forest"]
 
 # Parse arguments
 addfile = ""
+ownedCards = ""
 to = storage
 parseTcgpOrder = False
 parseDecklist = False
 removeFromStorage = False
 shop = False
 shopParse = False
+edh = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ha:t:pln:d:s:r:", [
+    opts, args = getopt.getopt(sys.argv[1:], "ha:t:pln:d:s:r:e", [
         "help", 
         "add=",
         "to=", 
@@ -36,7 +38,8 @@ try:
         "new=", 
         "delete=", 
         "shoplist=", 
-        "shopparse="
+        "shopparse=",
+        "edh"
     ])
 except:
     print("ERROR: invalid arguments. See -h or --help")
@@ -80,22 +83,35 @@ for opt, arg in opts:
         print("Looking for owned cards in", arg)
         shopParse = True
         shopParseDeck = inv.worksheet(arg)
+    elif opt in ("-e", "--edh"):
+        print("Buying EDH deck, allowing proxies")
+        edh = True
 
 
 # TODO: make everything after here a function
 if shop:
     desiredList = getDecklistCards(shopFile)
-    ownedCards = storage.col_values(1) + inv.worksheet("trades").col_values(1)
+    cardsInDecks = inv.worksheet("EDH-Breena").col_values(1) + inv.worksheet("EDH-Jeskai Spellslinger").col_values(1) + inv.worksheet("MOD-GTron").col_values(1)
+    if edh:
+        ownedCards = storage.col_values(1) + inv.worksheet("trades").col_values(1) + cardsInDecks
+    else:
+        ownedCards = storage.col_values(1) + inv.worksheet("trades").col_values(1)
+            
     if shopParse:
         ownedCards += shopParseDeck.col_values(1)
     
     shoppingList = list(set(desiredList[0]).difference(ownedCards))
+    proxies = list(set(desiredList[0]).difference(shoppingList))
     shopFile += ".shop"
     print("Saving shopping list to", shopFile)
     with open(shopFile, "w") as f:
         for item in shoppingList:
             if item:
                 f.write('1 ' + item + '\n')
+        f.write('\n\n\n\n')
+        for item2 in proxies:
+            if item2:
+                f.write('p: ' + item2 + '\n')
     f.close()
     print("https://tcgplayer.com/massentry")
 
